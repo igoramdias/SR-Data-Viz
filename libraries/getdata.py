@@ -212,7 +212,7 @@ def get_symbol_data(symbol):
         gvar['legend'].append(col_names[n])
         data[f'v{n}'] = df[symbol][col_names[n]]
         n += 1
-
+    
     if data['group'] == 'name':
 
         # Veio no formato de data
@@ -384,5 +384,6 @@ def get_symbol_data(symbol):
     data['size']  = len(xaxis) # n_months
     data['xaxis'] = xaxis
     data['yaxis'] = yaxis
+    print('xaxis')
 
     return data, save_file_name
