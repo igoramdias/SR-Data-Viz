@@ -225,7 +225,10 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
         if TEMPLATE not in ['SBT']:
             x0 += get_block_dx(data, pos)
         else:
-            x0 += (xmax)/(size+1.5)
+            if symbol != 'SELIC':
+                x0 += (xmax)/(size+1.5)
+            else:
+                x0 += (xmax)/(size+11)
 
     gvar['bar_xc'] = []
 
@@ -240,7 +243,7 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
             x1 = x0 + block_dx
         else:
             x1 = x0 + block_w
-        xc = (x0+x1) / 2
+        xc = (x0+x1) / 2 
 
         y1 = val_to_y(yref, y0, val, val_min, val_max)
 
@@ -344,6 +347,10 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
         if graph_type[:3] == 'bar' or (graph_type == 'step' and is_last):
             txt = format_data_to_show(data, val)
             if TEMPLATE != 'SBT_LOWER':
+                if graph_type == 'step':
+                    last_diff=True
+                    val_y -= 50
+                    txt += '%'
                 txt = text_bold(txt, last_diff or bar_val_bold)
                 add_annot(annot, xc, val_y, txt, bar_val_fc, bar_val_fs,
                     xanchor='center', yanchor=val_yanchor, bg_color=txt_bg_color)
@@ -421,7 +428,7 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
 
         if graph_type == 'barp' and data.get('show_leg', 1) == 2:
             date_y += font_size * 1.3
-        
+        print(txt)
         if TEMPLATE in ['SBT']:
             if val>val_old:
                 color = '#50B7F8'
@@ -714,7 +721,7 @@ def update_graph(fig, symbol, n_months, title, subtit, dfont, bg_transparent, va
         if len(dfont) > 1:
             if TEMPLATE != 'SBT_LOWER':
                 add_annot(annot, DFONT_X, DFONT_Y,
-                    f'FONTE: {dfont}', dfont_fc, dfont_fs)
+                    f'FONTE: {dfont}', dfont_fc, dfont_fs, xanchor='right')
 
         fig.update_layout(annotations=annot)
 
