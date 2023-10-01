@@ -182,7 +182,7 @@ def get_coins_data(df, date_ini, date_end):
 
 
 def money_format(val):
-    if TEMPLATE == 'SBT':
+    if TEMPLATE in ['SBT', 'SBT_LOWER']:
         decimal = gvar.get('decimal', 0)
         return locale.format_string('%d', round(val), grouping=True) 
     else:    

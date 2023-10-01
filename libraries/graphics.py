@@ -269,7 +269,7 @@ def set_graph(fig, width, height, scale, bg_color, font):
 
     width  *= scale
     height *= scale
-
+    
     fig.update_layout(
         paper_bgcolor=bg_color,
         plot_bgcolor=bg_color,

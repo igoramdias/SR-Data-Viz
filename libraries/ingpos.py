@@ -96,6 +96,23 @@ if TEMPLATE == 'SBT':
     block_info_x1  = 0
     block_info_y1  = 0
 
+if TEMPLATE == 'SBT_LOWER':
+    diff_x = 0.51
+    diff_y = 0.67
+    subdiff_x = 0.62 
+    pp_x = 0.17
+    pp_y = 0.67
+    asset_x = px_rel(420)
+    dfont_x = px_rel(350)
+    asset_y = IMAGET - px_rel(110)
+    dfont_y = IMAGET - px_rel(330)
+    close_x = IMAGER - px_rel(150)
+    close_y = 0.5
+    block_info_x0  = 0  # pp_x
+    block_info_y0  = 0
+    block_info_x1  = 0
+    block_info_y1  = 0
+
 
 block_info_lbl_dx = [0.14, 0.10, 0.15]
 
@@ -149,16 +166,35 @@ else:
             -40,
             -40,
         ]
+    
+    if TEMPLATE == 'SBT_LOWER':
+        block_info_lbl_x = [
+            block_info_w + 0.19,
+            block_info_w + 0.19,
+            block_info_cen,  # não usado
+        ]
 
-if TEMPLATE != 'SBT':
+        block_info_line_x = [
+            -40,
+            -40,
+        ]
+
+if TEMPLATE not in ['SBT', 'SBT_LOWER']:
     block_info_lbl_y = [
             block_info_mid + block_info_h * 0.17,
             block_info_mid - block_info_h * 0.23
     ]
 else:
-    block_info_lbl_y = [
-            block_info_mid
-    ]
+    if TEMPLATE == 'SBT_LOWER':
+        block_info_lbl_y = [
+                block_info_mid + 0.14,
+                block_info_mid + 0.06
+        ]
+    else:
+        block_info_lbl_y = [
+                block_info_mid,
+                block_info_mid
+        ]
 
 # Position in label list
 LBL_POS_X = 0

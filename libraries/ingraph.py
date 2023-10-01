@@ -25,7 +25,7 @@ def set_layout(fig):
 
     pres_template = logo_pgm_template
 
-    if TEMPLATE != 'SBT':
+    if TEMPLATE not in ['SBT', 'SBT_LOWER']:
         fig.update_layout(
             template = pres_template,
             margin=dict(t=MARGINT*GS, b=MARGINB*GS, l=MARGINL*GS,  r=MARGINR*GS, pad=MARGINPAD*GS),
@@ -39,19 +39,26 @@ def set_layout(fig):
             separators=',.',
         )
     else:
-        fig.update_layout(
-            template = pres_template,
-            margin=dict(t=MARGINT*GS, b=MARGINB*GS, l=MARGINL*GS,  r=MARGINR*GS, pad=MARGINPAD*GS),
-            width=IMAGEW*GS, height=IMAGEH*GS,
-            # paper_bgcolor='#EEEEEE',
-            xaxis=dict(tickfont = dict(size=size_ticks * GS, color=color_ticks), color=color_ticks, ticks='outside',
-                tickwidth=0*GS, ticklen=5*GS),
-            yaxis=dict(tickfont = dict(size=size_ticks * GS, color=color_ticks)),
-            # yaxis_separatethousands = True,
-            yaxis_tickformat = ',.0f',  # 'digits'
-            separators=',.',
-        )
-        fig.update_xaxes(anchor='free', position=0.15, domain=(0.04, 0.98), linecolor='rgba(0,0,0,0)')
+        if TEMPLATE == 'SBT':
+            fig.update_layout(
+                template = pres_template,
+                margin=dict(t=MARGINT*GS, b=MARGINB*GS, l=MARGINL*GS,  r=MARGINR*GS, pad=MARGINPAD*GS),
+                width=IMAGEW*GS, height=IMAGEH*GS,
+                # paper_bgcolor='#EEEEEE',
+                xaxis=dict(tickfont = dict(size=size_ticks * GS, color=color_ticks), color=color_ticks, ticks='outside',
+                    tickwidth=0*GS, ticklen=5*GS, anchor='free', position=0.15, domain=(0.04, 0.97), linecolor='rgba(0,0,0,0)'),
+                yaxis=dict(visible= False, showticklabels= False, anchor='free', domain=(0.15, 1)),
+            )
+        else:
+            fig.update_layout(
+                template = pres_template,
+                margin=dict(t=MARGINT*GS, b=MARGINB*GS, l=MARGINL*GS,  r=MARGINR*GS, pad=MARGINPAD*GS),
+                width=IMAGEW*GS, height=IMAGEH*GS,
+                # paper_bgcolor='#EEEEEE',
+                xaxis=dict(tickfont = dict(size=size_ticks * GS, color=color_ticks), color=color_ticks, ticks='outside',
+                    tickwidth=0*GS, ticklen=5*GS, anchor='free', position=0.3, domain=(0.12, 0.88), linecolor='rgba(0,0,0,0)'),
+                yaxis=dict(visible= False, showticklabels= False, anchor='free', domain=(0.15, 1)),
+            )
 
     set_margins(fig, MARGINL, MARGINR, MARGINT, MARGINB, MARGINPAD)
 
@@ -116,7 +123,7 @@ if TEMPLATE == 'SBT':
 # def set_price(price):
 #     return f'<b>{money_format(price)}</b>'
 def set_price(price, diff):
-    if TEMPLATE == "SBT":
+    if TEMPLATE in ["SBT", "SBT_LOWER"]:
         return f'<b>{money_format(diff)}</b>'
     else:
         return f'<b>{money_format(price)} ({money_format(diff)})</b>'
@@ -133,7 +140,7 @@ def set_diff(diff, price):
 
     diff_perc = diff / price * 100
 
-    if TEMPLATE != 'SBT':
+    if TEMPLATE not in ["SBT", "SBT_LOWER"]:
         # return f'<b>{money_format(diff)} ({money_format(diff_perc)}%) {diff_arrow_chr}</b>'
         return f'<b>{money_format(diff_perc)}% {diff_arrow_chr}</b>'
     else:
@@ -150,8 +157,8 @@ def block_annotation_labels(annotations, prices, info_prices):
             block_info_text=['ABERTURA', 'FECHAMENTO']
     block_info_price=[]
 
-    block_info_price.append(prices[0])  # Open
-    block_info_price.append(info_prices[1])  # Close last-day
+    block_info_price.append(info_prices[1])  # Open
+    block_info_price.append(info_prices[0])  # Close last-day
     # block_info_price.append(prices.max())
     # block_info_price.append(prices.min())
     block_info_price.append(info_prices[2])
@@ -167,7 +174,7 @@ def block_annotation_labels(annotations, prices, info_prices):
             lin = bi_pos %  2
             col = bi_pos // 2
             
-            if TEMPLATE != "SBT":
+            if TEMPLATE not in ["SBT", 'SBT_LOWER']:
                 text_info_label = [block_info_lbl_x[col] - block_info_lbl_dx[col] - px_rel(GT_BLOCK_DX),
                     block_info_lbl_y[lin], GT_BLOCK_FONT_COLOR, GT_BLOCK_LBL_FS]
 
@@ -181,49 +188,71 @@ def block_annotation_labels(annotations, prices, info_prices):
                     f'{get_value_txt(block_info_price[bi_pos])}'))
                     # f'{get_value_txt(block_info_price[bi_pos], bold=True)}'))
             else:
-                price_info_label = [block_info_lbl_x[lin],
-                    block_info_lbl_y[0] + 0.01, GT_BLOCK_FONT_COLOR, 45]
+                if bi_pos < 2:
+                    
+                    if TEMPLATE == 'SBT': 
+                        price_info_label = [block_info_lbl_x[lin],
+                            block_info_lbl_y[0] + 0.01, GT_BLOCK_FONT_COLOR, 45]
 
-                annotations.append(label_to_dict(price_info_label,
-                    f'{get_value_txt(block_info_price[bi_pos])}', xanchor='right'))
-                
-                annotations.append(label_to_dict([block_info_lbl_x[lin]+0.01, block_info_lbl_y[0] + 0.03, GT_BLOCK_FONT_COLOR, 23],
-                    f'{get_value_txt(int(block_info_price[bi_pos]*100 % 100))}', xanchor='left'))
+                        annotations.append(label_to_dict(price_info_label,
+                        f'{get_value_txt(block_info_price[bi_pos])}', xanchor='right'))
+                    
+                        annotations.append(label_to_dict([block_info_lbl_x[lin]+0.01, block_info_lbl_y[lin] + 0.03, GT_BLOCK_FONT_COLOR, 23],
+                            f'{get_value_txt(int(block_info_price[bi_pos]*100 % 100))}', xanchor='left'))
+                    else:
+                        price_info_label = [block_info_lbl_x[lin],
+                            block_info_lbl_y[lin], GT_BLOCK_FONT_COLOR, 45]
+
+                        annotations.append(label_to_dict(price_info_label,
+                            f'{get_value_txt(block_info_price[bi_pos])}', xanchor='right'))
+                        
+                        annotations.append(label_to_dict([block_info_lbl_x[lin]+0.01, block_info_lbl_y[lin] + 0.015, GT_BLOCK_FONT_COLOR, 23],
+                            f'{get_value_txt(int(block_info_price[bi_pos]*100 % 100))}', xanchor='left'))
 
     gvar['decimal'] = decimal
 
 
 def update_labels(fig, period, prices, info_prices, market_time_ts, symbol, currency):
 
-    # price = prices.iloc[-1]
-    price = info_prices[0]
-    price_previous_close = info_prices[1]
+    price = prices.iloc[-1]
+    #price = info_prices[0]
+    #price_previous_close = info_prices[1]
     price_open = prices.iloc[0]
 
-    if TEMPLATE == 'SBT':
-        info_prices[1] = prices.iloc[-1]
-
-    if period == 0:
-        price_first = price_previous_close
-    else:
-        price_first = price_open
+    #if period == 0:
+    #    price_first = price_previous_close
+    #else:
+    price_first = price_open
 
     diff  = price - price_first
 
     price_txt = set_price(price, diff)
     diff_txt  = set_diff(diff, price_first)
-
+    
     annotations = []
     if TEMPLATE == 'SBT':
         if diff > 0:
             add_image(fig, 'images/sbt/bg_001_arrowup.png', 43, 130,
                 890, 380, xanchor='left', yanchor='top', layer='below')
-            annotations.append(label_to_dict([subdiff_x-0.02+0.001, diff_y+0.013, '#65E0FF', 30], f'<b>,{int(diff*100 % 100)}</b>'))
-            annotations.append(label_to_dict([subdiff_x-0.02, diff_y, '#65E0FF', 60], price_txt))
+            annotations.append(label_to_dict([subdiff_x-0.02+0.002, diff_y+0.013, '#65E0FF', 30], f'<b>,{int(diff*100 % 100)}</b>', xanchor='left'))
+            annotations.append(label_to_dict([subdiff_x-0.02, diff_y, '#65E0FF', 60], price_txt, xanchor='right'))
             annotations.append(label_to_dict([pp_x+0.06,   pp_y,   '#65E0FF', 60], diff_txt))
         else:
             add_image(fig, 'images/sbt/bg_001_arrowdown.png', 43, 130,
                 890, 380, xanchor='left', yanchor='top', layer='below')
+            annotations.append(label_to_dict([subdiff_x+0.001, diff_y+0.013, '#FF657F', 30], f'<b>,{int(diff*100 % 100)}</b>', xanchor='left'))
+            annotations.append(label_to_dict([subdiff_x, diff_y, '#FF657F', 60], price_txt, xanchor='right'))
+            annotations.append(label_to_dict([pp_x+0.05,   pp_y,   '#FF657F', 60], diff_txt))
+    elif TEMPLATE == 'SBT_LOWER':
+        if diff > 0:
+            add_image(fig, 'images/sbt/bg_lower_001_arrowup.png', 0, 0,
+                978, 600, xanchor='left', yanchor='top', layer='below')
+            annotations.append(label_to_dict([subdiff_x-0.02+0.001, diff_y+0.013, '#65E0FF', 30], f'<b>,{int(diff*100 % 100)}</b>', xanchor='left'))
+            annotations.append(label_to_dict([subdiff_x-0.02, diff_y, '#65E0FF', 60], price_txt, xanchor='right'))
+            annotations.append(label_to_dict([pp_x+0.06,   pp_y,   '#65E0FF', 60], diff_txt))
+        else:
+            add_image(fig, 'images/sbt/bg_lower_001_arrowdown.png', 0, 0,
+                600, 1080, xanchor='left', yanchor='top', layer='below')
             annotations.append(label_to_dict([subdiff_x+0.001, diff_y+0.013, '#FF657F', 30], f'<b>,{int(diff*100 % 100)}</b>', xanchor='left'))
             annotations.append(label_to_dict([subdiff_x, diff_y, '#FF657F', 60], price_txt, xanchor='right'))
             annotations.append(label_to_dict([pp_x+0.05,   pp_y,   '#FF657F', 60], diff_txt))
@@ -237,25 +266,31 @@ def update_labels(fig, period, prices, info_prices, market_time_ts, symbol, curr
     if  symbol_name == symbol:
         symbol_name = ''
 
-    if TEMPLATE != 'SBT':
+    if TEMPLATE not in ['SBT', 'SBT_LOWER']:
         symbol_text = f'{symbol_name}<b> ({symbol})</b>'
     else:
         symbol_text = symbol_name.upper()
 
-    if TEMPLATE == 'SBT':
+    if TEMPLATE in ['SBT', 'SBT_LOWER']:
         txt = f'<span style="fill-opacity: 0; stroke: #50B7F8; stroke-opacity: 1; clip-path: inset(48px 0px 33px 0px)">{symbol_text}</span>'
-        annotations.append(label_to_dict([0.58, 1.13, '#FF657F', 180], txt, xanchor='right'))
+        if TEMPLATE == 'SBT':
+            annotations.append(label_to_dict([0.58, 1.13, '#FF657F', 180], txt, xanchor='right'))
+        else:
+            annotations.append(label_to_dict([0.02, 0.832, '#FF657F', 180], txt, xanchor='left'))
 
     annotations.append(label_to_dict(asset_label, symbol_text, xanchor='right'))
 
-    if TEMPLATE != 'SBT':
+    if TEMPLATE not in ['SBT', 'SBT_LOWER']:
         annotations.append(label_to_dict(dfont_label, 'FONTE: YAHOO FINANCE', xanchor='right'))
     else:
         ts = pd.Timestamp(str(date.today())) 
         offset = pd.tseries.offsets.BusinessDay(n=1)
         res = date.today() - offset
-        annotations.append(label_to_dict([0.95, 1.12, '#0A2038', 50], f'{str(res.day).zfill(2)}|{str(res.month).zfill(2)}|{str(res.year).zfill(2)}', xanchor='right'))
-
+        if TEMPLATE == 'SBT':
+            annotations.append(label_to_dict([0.95, 1.12, '#0A2038', 50], f'{str(res.day).zfill(2)}|{str(res.month).zfill(2)}|{str(res.year).zfill(2)}', xanchor='right'))
+        else:
+            annotations.append(label_to_dict([0.05, 0.75, '#fff', 35], f'{str(res.day).zfill(2)}|{str(res.month).zfill(2)}|{str(res.year).zfill(2)}', xanchor='left'))
+    
     if market_time_ts == 0:
         market_time = 'Feriado'
     else:
@@ -266,22 +301,25 @@ def update_labels(fig, period, prices, info_prices, market_time_ts, symbol, curr
         market_time = dt_obj.strftime('%d de %b. %H:%M')
         market_time +=  ' ' + market_time_ts["timezone"]
     
-    if TEMPLATE != 'SBT':
+    if TEMPLATE not in ['SBT', 'SBT_LOWER']:
         annotations.append(label_to_dict(time_label,
                 f'{market_time}'
                 f'\xa0\xa0 (Moeda: {currency})'))
-
+    
     # value of last close at line
-    if period == 0 and TEMPLATE != 'SBT':
+    if period == 0 and TEMPLATE not in ['SBT', 'SBT_LOWER']:
         close_txt = f'FECHAM.<br>{get_value_txt(info_prices[1])}'
-    else:
-        close_txt = ''
-    close_price_label[1] = info_prices[1]
-    annotations.append(label_to_dict(close_price_label, close_txt,
+        close_price_label[1] = info_prices[1]
+        annotations.append(label_to_dict(close_price_label, close_txt,
         yref='y', xanchor='right'))
-
+    else:
+        
+        close_price_label = [None, None]
+        close_txt = ''
+    
+    
     block_annotation_labels(annotations, prices, info_prices)
-
+    
     fig.update_layout(
         annotations=annotations
     )

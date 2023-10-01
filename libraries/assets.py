@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from unidecode import unidecode
 from .coins import *
 from .gvar import *
+import yfinance as yf
 
 # Info to download data
 headers = {
@@ -74,24 +75,27 @@ def download_data(symbol_code):
                 continue
 
         # Set parameters of data do be got
-        params['symbol'] = symbol_code
-        params['range'] = p_range
-        params['interval'] = interval
+        #params['symbol'] = symbol_code
+        #params['range'] = p_range
+        #params['interval'] = interval
 
         try:
-            response = requests.request("GET", url, headers=headers, params=params)
+            #response = requests.request("GET", url, headers=headers, params=params)
+            index = yf.Ticker(params['symbol'])
 
             # Copy json to data
-            data[period] = response.json()
+            #data[period] = response.json()
+            data[period] = index.history(period=params['range'], interval=params['interval'])
 
             # Save file
             with open(file_name, 'w', encoding='utf-8') as f:
-                json.dump(data[period], f, ensure_ascii=False) #, indent=4)
+                json.dump(data[period].to_json(), f, ensure_ascii=False) #, indent=4)
 
-            ts = data[period]['chart']['result'][0]['meta']['regularMarketTime']
-            dt = datetime.fromtimestamp(ts)
-            market_date_int = dt.year*10000 + dt.month*100 + dt.day
+            #ts = data[period]['chart']['result'][0]['meta']['regularMarketTime']
+            #dt = datetime.fromtimestamp(ts)
+            #market_date_int = dt.year*10000 + dt.month*100 + dt.day
         except:
+            print('Failed to dowload data')
             dojo_error = -1  # download fail
 
 
@@ -107,7 +111,7 @@ def load_data():
     try:
         for period in [1, 6, 7]:
             with open(f'data/data_{symbol}_{period}.json') as json_file:
-                data[period] = json.load(json_file)
+                data[period] = pd.read_json(json.load(json_file)).reset_index().rename(columns={'index': 'dtime'})
 
         data[0] = data[1]
         data[2] = data[6]
@@ -137,45 +141,47 @@ def convert_data():
     global df_period, ts_market, dojo_error
 
     try:
-        info = data[1]['chart']['result'][0]['meta']
-        ts_market = info['regularMarketTime']
-        dt_market = datetime.fromtimestamp(ts_market)
-        date_market = dt_market.replace(hour=0, minute=0, second=0)
+        #info = data[1]['chart']['result'][0]['meta']
+        #ts_market = info['regularMarketTime']
+        #dt_market = datetime.fromtimestamp(ts_market)
+        #date_market = dt_market.replace(hour=0, minute=0, second=0)
 
         df = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         ndays = [0, 4, 30, 182,  0, 365, 5*365, 30*365, 365]
 
         # days to the beginning of the year
-        date_year_init = date_market.replace(month=1, day=1)
-        ndays[4] = (date_market - date_year_init).days # + 1
+        #date_year_init = date_market.replace(month=1, day=1)
+        #ndays[4] = (date_market - date_year_init).days # + 1
 
         # variable days
-        ndays[8] = (date_market - gvar['date_ini']).days # + 1
+        #ndays[8] = (date_market - gvar['date_ini']).days # + 1
 
         for period in range(bt_qty):
-            tstamp = data[period]['chart']['result'][0]['timestamp']
-            openp  = data[period]['chart']['result'][0]['indicators']['quote'][0]['open']
-            close  = data[period]['chart']['result'][0]['indicators']['quote'][0]['close']
-            high   = data[period]['chart']['result'][0]['indicators']['quote'][0]['high']
-            low    = data[period]['chart']['result'][0]['indicators']['quote'][0]['low']
+            #tstamp = data[period]['chart']['result'][0]['timestamp']
+            #openp  = data[period]['chart']['result'][0]['indicators']['quote'][0]['open']
+            #close  = data[period]['chart']['result'][0]['indicators']['quote'][0]['close']
+            #high   = data[period]['chart']['result'][0]['indicators']['quote'][0]['high']
+            #low    = data[period]['chart']['result'][0]['indicators']['quote'][0]['low']
 
             # Convert timestamp to datetime
             datet, dtime, dtformat = [], [], []
-            for ts in tstamp:
-                dt_obj = datetime.fromtimestamp(ts)
-                datet.append(dt_obj)
-                dtime.append(dt_obj.strftime('%d/%m/%Y %H:%M'))
-                dtformat.append(dt_obj.strftime(date_format[period]))
+            #for ts in tstamp:
+            #    dt_obj = datetime.fromtimestamp(ts)
+            #    datet.append(dt_obj)
+            #    dtime.append(dt_obj.strftime('%d/%m/%Y %H:%M'))
+            #    dtformat.append(dt_obj.strftime(date_format[period]))
 
             # Create dataframe with data
-            df[period] = pd.DataFrame({'tstamp':tstamp, 'datet':datet, 'dtime':dtime, 'dtformat':dtformat,
-                'open':openp, 'close':close, 'high':high, 'low':low}
-                ).dropna().reset_index(drop=True)
+            #df[period] = pd.DataFrame({'tstamp':tstamp, 'datet':datet, 'dtime':dtime, 'dtformat':dtformat,
+            #    'open':openp, 'close':close, 'high':high, 'low':low}
+            #    ).dropna().reset_index(drop=True)
+            df[period] = data[period]
+            df[period].dtime = df[period].dtime + pd.DateOffset(hours = -3)
 
             # df[period] = df[period][ df[period].tstamp >= ts_market - ndays[period] * 24*3600 ].reset_index(drop=True)
-            if bt_range[period] != 'max':
-                df[period] = df[period][ df[period].datet >= (date_market -
-                            timedelta(days=ndays[period])) ].reset_index(drop=True)
+            #if bt_range[period] != 'max':
+            #    df[period] = df[period][ df[period].datet >= (date_market -
+            #                timedelta(days=ndays[period])) ].reset_index(drop=True)
 
             df_period[period] = df[period].copy()
     except:
@@ -210,12 +216,15 @@ def get_info_prices(period):
     # Melhorar essa parte do código
     # 0=preço atual, 1=close anterior, 2=maximo, 3=minimo, 4=max52, 5=min52
     info_prices = []
-    info_prices.append(data[0]['chart']['result'][0]['meta']['regularMarketPrice'])
-    info_prices.append(data[0]['chart']['result'][0]['meta']['previousClose'])  # or 'chartPreviousClose' ???
+    
+    #info_prices.append(data[0]['chart']['result'][0]['meta']['regularMarketPrice'])
+    #info_prices.append(data[0]['chart']['result'][0]['meta']['previousClose'])  # or 'chartPreviousClose' ??? index.info['previousClose']
+    info_prices.append(0)
+    info_prices.append(0)
 
     # This way, picks the real max and min
-    info_prices.append(df_period[period].high.max())
-    info_prices.append(df_period[period].low.min())
+    info_prices.append(df_period[period].High.max())
+    info_prices.append(df_period[period].Low.min())
 
     # This way, picks the max and min of close/open (value presented in graph)
     # if bt_interval[period] == '1d':
@@ -225,8 +234,8 @@ def get_info_prices(period):
     #     info_prices.append(df_period[period].open.max())
     #     info_prices.append(df_period[period].open.min())
 
-    info_prices.append(df_period[5].high.max())
-    info_prices.append(df_period[5].low.min())
+    info_prices.append(df_period[5].High.max())
+    info_prices.append(df_period[5].Low.min())
 
     return info_prices
 

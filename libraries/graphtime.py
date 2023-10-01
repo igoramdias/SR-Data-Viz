@@ -364,20 +364,25 @@ def draw_graph_001(fig, annot, date_ini, date_end, symbol, bg_transparent, debug
     try:
         df = df_period[period]
         if bt_interval[period] == '1d':
-            df['price'] = df.close
+            df['price'] = df.Close
         else:
-            df['price'] = df.open
+            df['price'] = df.Open
 
         info_prices = get_info_prices(period)
+        info_prices[1] = df.price.iloc[0]
+        info_prices[0] = df.price.iloc[-1]
 
-        info = data[0]['chart']['result'][0]['meta']
-
+        #info = data[0]['chart']['result'][0]['meta']
+        info = None
+        
         ts_market = {}
-        ts_market['time']      = info['regularMarketTime']
-        ts_market['gmtoffset'] = info['gmtoffset']
-        ts_market['timezone']  = info['timezone']
+        #ts_market['time']      = info['regularMarketTime']
+        #ts_market['gmtoffset'] = info['gmtoffset']
+        #ts_market['timezone']  = info['timezone']
 
-        currency = info['currency']
+
+        #currency = info['currency']
+        currency = 'BRL'
 
         if currency == 'BRL':
             separators=',.'
@@ -387,26 +392,27 @@ def draw_graph_001(fig, annot, date_ini, date_end, symbol, bg_transparent, debug
             locale.setlocale(locale.LC_ALL, 'en_US')
 
         ts_market_ok = ts_market
+        ts_market_ok = 0
         # if HOLI_checked:
         #     ts_market_ok = 0
         update_labels(fig, period, df.price, info_prices, ts_market_ok, symbol, currency)
-
-        if period == 0 and TEMPLATE != 'SBT':
+        
+        if period == 0 and TEMPLATE not in ['SBT', 'SBT_LOWER']:
             show_close_line(fig, info_prices[1])
         else:
             hide_close_line(fig)
-
+        
         # Update axis and line of the graph
         scatter = fig.data[0]
-        if TEMPLATE != 'SBT':
+        if TEMPLATE not in ['SBT', 'SBT_LOWER']:
             scatter.line=dict(color=diff_price_label[LBL_POS_COLOR], width=GT_TRACE_WIDTH*GS)
             scatter.x = df.dtime[::per_intspace[period]]
             scatter.y = df.price[::per_intspace[period]]
         else:
             scatter.line=dict(color='rgba(0,0,0,0)', width=GT_TRACE_WIDTH*GS)
-            scatter.x = df.dtime[::per_intspace[period]]
-            scatter.y = df.price[::per_intspace[period]]
-            size = len(df.price[::per_intspace[period]])
+            scatter.x = df.dtime[::6].apply(lambda x: x.strftime('%H:%M'))
+            scatter.y = df.price[::6]
+            size = len(df.price[::6])
 
             if (df.price[::per_intspace[period]][0] > df.price[::per_intspace[period]][size-1]):
                 direction=-1
@@ -475,7 +481,7 @@ def draw_graph_001(fig, annot, date_ini, date_end, symbol, bg_transparent, debug
         ytick_max = max(info_prices[2], info_prices[1]) + (info_prices[2] - info_prices[3]) * 0.10
         ytick_min = min(info_prices[3], info_prices[1]) * 0.9999 # precisa dessa mult. para exibir (próx. do 0 não exibe linha pontilhada)
 
-        if TEMPLATE == 'SBT':
+        if TEMPLATE in ['SBT', 'SBT_LOWER']:
             bg_color = 'rgba(0,0,0,0)'
         else:
             bg_color = 'white'
@@ -484,13 +490,9 @@ def draw_graph_001(fig, annot, date_ini, date_end, symbol, bg_transparent, debug
 
         # set number format in y axis
         fig.update_layout(
-            yaxis_tickformat = yaxis_tickformat,
-            separators=separators,
-            yaxis_range=[ytick_min, ytick_max], yaxis_nticks=6,
             paper_bgcolor=bg_color,
             plot_bgcolor=bg_color,
         )
-        fig.update_yaxes(visible=False, showticklabels=False, anchor='free', domain=(0.15, 1))
     except:
         g001_error = -1
 
