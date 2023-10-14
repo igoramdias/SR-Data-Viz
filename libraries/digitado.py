@@ -19,7 +19,7 @@ def get_list(symbol_data, var, sep=','):
 
 
 def get_digitado_lines(file_name, return_lines=True):
-    file_path = f'data/digitado/{file_name}.csv'
+    file_path = f'data/digitado/{file_name}.csv' 
     file = open(file_path, 'r', encoding='utf8')
     lines = file.readlines()
     file.close()

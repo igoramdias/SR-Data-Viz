@@ -446,7 +446,7 @@ def load_ibov():
     download_ibov()
     last_date_ok = df_bo.index[-1]
     df_new = download_ibov()
-    print(df_new.index)
+    
     df_bo = pd.concat([df_bo, df_new.loc[df_new.index > last_date_ok]])
 
     global df_bov

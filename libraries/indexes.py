@@ -156,12 +156,13 @@ def ibge_get_json(agreg, var, classif, period_ini, period_end):
     return data
 
 def ibge_get_data(agreg, var, classif, period_ini, period_end):
+    api_enabled = ['1737-63']
     data = ibge_get_json(agreg, var, classif, period_ini, period_end)
 
     file_name = f'data/ibge/{agreg}_{var}_{classif}.csv'
     if exists(file_name):
         df0 = pd.read_csv(file_name)
-
+    
     try:
         df = pd.DataFrame({'valor':data[0]['resultados'][0]['series'][0]['serie']})
         df = df.reset_index().rename(columns={'index':'data'})
@@ -183,16 +184,21 @@ def ibge_get_data(agreg, var, classif, period_ini, period_end):
         if 'df0' in locals():
             d_new = df.data.iloc[-1]
             d_old = df0.data.iloc[-1]
+            print(d_new)
+            print(d_old)
+            print(d_new < d_old)
             if d_new < d_old:  # Usa "<" pois podem corrigir dados, então se for igual usa o que baixou
                 df = df0
                 new_data = False
         if new_data:
+            print('aqui')
             if str(agreg) == '3065' and str(var) == '355':  # IPCA-15 (tem passado na mão)
                 df = pd.concat([df0[:68], df])
-            df.to_csv(file_name, index=False, line_terminator='\n')
+            df.to_csv(file_name, index=False, lineterminator='\n')
     except:
+        print('aqui')
         df = df0
-
+    print(df)
     return df
 
 

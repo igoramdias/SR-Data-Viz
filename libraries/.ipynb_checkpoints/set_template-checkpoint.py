@@ -12,7 +12,7 @@ libraries = [
 def set_template(tp_num):
     tp_lib  = importlib.import_module(f'libraries.{templates[tp_num]}')
     tp_vars = [var for var in dir(tp_lib) if not var.startswith("__")]
-    print('uauuu')
+    
     for lib_name in libraries:
         lib = importlib.import_module(f'libraries.{lib_name}')
         for tp_var in tp_vars:

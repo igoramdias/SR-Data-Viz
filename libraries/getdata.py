@@ -70,19 +70,22 @@ def index_code(symbol):
     else:
         return None
 
+def pull_data(var_name):
+    print(var_name)
+
 def load_symbol_data(symbol):
     global df
 
     gvar['legend'] = []
 
     bc_sgs_agreg, ibge_agreg = 0, 0
-
+    print('aqui')
     # Arquivos de dados criados manualmente
     if symbol in files_created:
         datahead, skiprows = load_info_digitado(symbol)
         if gvar.get('dig_mode'):
             load_info_digitado('digitado', symbol)
-
+        print(datahead)
         if gvar['ERROR'] != '':
             return
 
@@ -115,6 +118,8 @@ def load_symbol_data(symbol):
                 df[symbol]['month'] = df[symbol].data.str.slice(3,  5).astype(int)
 
             return
+        elif datahead[:3] == 'api':
+            pull_data(datahead)
         else:
             df[symbol] = load_data_digitado(symbol, datahead, skiprows)
             gvar['legend'].append(df[symbol].columns[1])
@@ -384,6 +389,5 @@ def get_symbol_data(symbol):
     data['size']  = len(xaxis) # n_months
     data['xaxis'] = xaxis
     data['yaxis'] = yaxis
-    print('xaxis')
 
     return data, save_file_name

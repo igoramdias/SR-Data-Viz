@@ -428,7 +428,7 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
 
         if graph_type == 'barp' and data.get('show_leg', 1) == 2:
             date_y += font_size * 1.3
-        print(txt)
+        
         if TEMPLATE in ['SBT']:
             if val>val_old:
                 color = '#50B7F8'
