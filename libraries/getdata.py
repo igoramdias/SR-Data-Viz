@@ -70,28 +70,25 @@ def index_code(symbol):
     else:
         return None
 
-def pull_data(var_name):
-    print(var_name)
-
 def load_symbol_data(symbol):
     global df
 
     gvar['legend'] = []
 
     bc_sgs_agreg, ibge_agreg = 0, 0
-    print('aqui')
+    
     # Arquivos de dados criados manualmente
     if symbol in files_created:
         datahead, skiprows = load_info_digitado(symbol)
         if gvar.get('dig_mode'):
             load_info_digitado('digitado', symbol)
-        print(datahead)
+
         if gvar['ERROR'] != '':
             return
 
         if datahead[:3] == 'BC_':
             bc_sgs_agreg = int(datahead[3:])
-        elif datahead[:5] == 'IBGE_':
+        elif datahead[:5] == 'IBGE_': 
             ibge_agreg = [int(x.strip()) for x in datahead[5:].split(',')]
             if ibge_agreg[2] == 0:
                 ibge_agreg[2] = None
@@ -118,13 +115,19 @@ def load_symbol_data(symbol):
                 df[symbol]['month'] = df[symbol].data.str.slice(3,  5).astype(int)
 
             return
-        elif datahead[:3] == 'api':
-            pull_data(datahead)
         else:
             df[symbol] = load_data_digitado(symbol, datahead, skiprows)
+            print(symbol)
             gvar['legend'].append(df[symbol].columns[1])
             df[symbol].rename(columns={'x':'setor', df[symbol].columns[1]:'valor'}, inplace=True)
             df[symbol]['setor'] = df[symbol]['setor'].astype(str).str.strip()
+            print(df[symbol])
+            
+            if (symbol == 'PIB-Comercio'):
+                print('aqui')
+                url = 'https://www.primetalkdata.com/datacenter/fgv_data/ics_presente_saz.csv'
+                df[symbol] = pd.DataFrame([info.split(',') for info in requests.get(url).text.split('\r\n')][1:], columns=['setor', 'valor']).dropna()
+                df[symbol].valor = df[symbol].valor.astype(float)
 
             # Se group não for "name" assume como data
             if symbol_list[symbol]['group'] != 'name':

@@ -158,10 +158,36 @@ def ibge_get_json(agreg, var, classif, period_ini, period_end):
 def ibge_get_data(agreg, var, classif, period_ini, period_end):
     api_enabled = ['1737-63']
     data = ibge_get_json(agreg, var, classif, period_ini, period_end)
-
+    
     file_name = f'data/ibge/{agreg}_{var}_{classif}.csv'
     if exists(file_name):
         df0 = pd.read_csv(file_name)
+    
+    print(agreg)
+    print(var)
+    print(classif)
+    if (agreg == 5932 and var == 6564 and classif == '11255[90691]'):
+        url = 'https://www.primetalkdata.com/datacenter/fgv_data/ici_presente_saz.csv'
+
+        upd_data = pd.DataFrame([info.split(',') for info in requests.get(url).text.split('\r\n')][1:], columns=['data', 'valor']).dropna()
+        upd_data.valor = (upd_data.valor.apply(lambda x: float(x)).values / upd_data.valor.apply(lambda x: float(x)).shift(1).values - 1)*100
+        upd_data.valor = upd_data.valor.round(2) 
+        upd_data.dropna(inplace=True)
+        upd_data.data = upd_data.data.str.replace(r'-', '', regex=True).astype(int)
+
+        df0 = upd_data
+    elif (agreg == 5932 and var == 6564 and classif == '11255[90696]'):
+        print('aqui')
+        url = 'https://www.primetalkdata.com/datacenter/fgv_data/icv_presente_saz.csv'
+
+        upd_data = pd.DataFrame([info.split(',') for info in requests.get(url).text.split('\r\n')][1:], columns=['data', 'valor']).dropna()
+        upd_data.valor = (upd_data.valor.apply(lambda x: float(x)).values / upd_data.valor.apply(lambda x: float(x)).shift(1).values - 1)*100
+        upd_data.valor = upd_data.valor.round(2) 
+        upd_data.dropna(inplace=True)
+        upd_data.data = upd_data.data.str.replace(r'-', '', regex=True).astype(int)
+
+        df0 = upd_data
+    
     
     try:
         df = pd.DataFrame({'valor':data[0]['resultados'][0]['series'][0]['serie']})
@@ -184,21 +210,15 @@ def ibge_get_data(agreg, var, classif, period_ini, period_end):
         if 'df0' in locals():
             d_new = df.data.iloc[-1]
             d_old = df0.data.iloc[-1]
-            print(d_new)
-            print(d_old)
-            print(d_new < d_old)
             if d_new < d_old:  # Usa "<" pois podem corrigir dados, então se for igual usa o que baixou
                 df = df0
                 new_data = False
         if new_data:
-            print('aqui')
             if str(agreg) == '3065' and str(var) == '355':  # IPCA-15 (tem passado na mão)
                 df = pd.concat([df0[:68], df])
             df.to_csv(file_name, index=False, lineterminator='\n')
     except:
-        print('aqui')
         df = df0
-    print(df)
     return df
 
 

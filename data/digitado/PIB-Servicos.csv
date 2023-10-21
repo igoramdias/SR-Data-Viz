@@ -1,5 +1,5 @@
 title;PIB-Serviços
-subtit;Variação sobre o trimestre anterior, em %
+subtit;Variação sobre a mês anterior, em %
 dfont;IBGE
 vtype;perc
 decimal;1
@@ -9,7 +9,7 @@ group;1
 yref;0
 ylines;
 blk_dx;74
-period;trim
+period;month
 ;
 ;
 ;
