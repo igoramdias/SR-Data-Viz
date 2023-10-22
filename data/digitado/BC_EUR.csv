@@ -1,6 +1,6 @@
-title;Selic
-subtit;Taxas determinadas pelo Copom, em % ao ano
-dfont;BC (Copom)
+title;Deposity Facility Rate
+subtit;Taxas determinadas pelo ECB, em % ao ano
+dfont;ECB
 vtype;rvalue
 decimal;2
 mult;1
@@ -22,4 +22,4 @@ xstep;10
 ;
 ;
 data;begin
-BC_432
+BC_EUR

@@ -86,8 +86,12 @@ def load_symbol_data(symbol):
         if gvar['ERROR'] != '':
             return
 
+        print(datahead)
         if datahead[:3] == 'BC_':
-            bc_sgs_agreg = int(datahead[3:])
+            if (datahead[3:].isdigit()):
+                bc_sgs_agreg = int(datahead[3:])
+            else:
+                bc_sgs_agreg = datahead[3:]
         elif datahead[:5] == 'IBGE_': 
             ibge_agreg = [int(x.strip()) for x in datahead[5:].split(',')]
             if ibge_agreg[2] == 0:
@@ -117,17 +121,19 @@ def load_symbol_data(symbol):
             return
         else:
             df[symbol] = load_data_digitado(symbol, datahead, skiprows)
-            print(symbol)
             gvar['legend'].append(df[symbol].columns[1])
             df[symbol].rename(columns={'x':'setor', df[symbol].columns[1]:'valor'}, inplace=True)
             df[symbol]['setor'] = df[symbol]['setor'].astype(str).str.strip()
-            print(df[symbol])
             
             if (symbol == 'PIB-Comercio'):
-                print('aqui')
                 url = 'https://www.primetalkdata.com/datacenter/fgv_data/ics_presente_saz.csv'
                 df[symbol] = pd.DataFrame([info.split(',') for info in requests.get(url).text.split('\r\n')][1:], columns=['setor', 'valor']).dropna()
                 df[symbol].valor = df[symbol].valor.astype(float)
+            #elif (symbol == 'SELIC'):
+            #    url = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?formato=json'
+            #    df[symbol] = pd.DataFrame([info.split(',') for info in requests.get(url).text.split('\r\n')][1:], columns=['setor', 'valor']).dropna()
+            #    df[symbol].valor = df[symbol].valor.astype(float)
+
 
             # Se group não for "name" assume como data
             if symbol_list[symbol]['group'] != 'name':
@@ -141,7 +147,7 @@ def load_symbol_data(symbol):
                     indice_to_valor(symbol)
 
                 get_date_from_txt(symbol)
-
+            
             return
 
 

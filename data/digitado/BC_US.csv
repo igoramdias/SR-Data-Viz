@@ -1,6 +1,6 @@
-title;Selic
-subtit;Taxas determinadas pelo Copom, em % ao ano
-dfont;BC (Copom)
+title;Funds Target Rate
+subtit;Taxas determinadas pelo FED, em % ao ano
+dfont;FED
 vtype;rvalue
 decimal;2
 mult;1
@@ -22,4 +22,4 @@ xstep;10
 ;
 ;
 data;begin
-BC_432
+BC_US

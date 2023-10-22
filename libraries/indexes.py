@@ -19,10 +19,19 @@ def bc_sgs_get_index_values(agreg):
     file_name = f'data/bc/{agreg}.csv'
     if exists(file_name):
         df0 = pd.read_csv(file_name)
-
+    
     try:
-        url = f'https://api.bcb.gov.br/dados/serie/bcdata.sgs.{agreg}/dados?formato=json'
-        df = pd.read_json(url)
+        if (agreg not in ['EUR', 'US']):
+            url = f'https://api.bcb.gov.br/dados/serie/bcdata.sgs.{agreg}/dados?formato=json'
+            df = pd.read_json(url)
+        else:
+            api_key = 'ff0029a3db2414219e0dbda63332bd04'
+            if (agreg == 'EUR'):
+                url = f'https://api.stlouisfed.org/fred/series/observations?series_id=ECBDFR&api_key={api_key}&file_type=json'
+            elif (agreg == 'US'):
+                url = f'https://api.stlouisfed.org/fred/series/observations?series_id=DFEDTARU&api_key={api_key}&file_type=json'
+            df = pd.DataFrame([[obs['date'], obs['value']] for obs in requests.get(url).json()['observations']], columns=['data', 'valor'])
+            df.data = pd.to_datetime(df.data).dt.strftime('%d/%m/%Y')
 
         df = df[df.valor != '']  # Algumas datas voltam com string vazia no campo valor
         df['valor'] = df.valor.astype(float)
@@ -35,10 +44,10 @@ def bc_sgs_get_index_values(agreg):
                 df = df0
                 new_data = False
         if new_data:
-            df.to_csv(file_name, index=False, line_terminator='\n')
+            df.to_csv(file_name, index=False, lineterminator='\n')
     except:
         df = df0
-
+   
     return df
 
 
@@ -163,9 +172,6 @@ def ibge_get_data(agreg, var, classif, period_ini, period_end):
     if exists(file_name):
         df0 = pd.read_csv(file_name)
     
-    print(agreg)
-    print(var)
-    print(classif)
     if (agreg == 5932 and var == 6564 and classif == '11255[90691]'):
         url = 'https://www.primetalkdata.com/datacenter/fgv_data/ici_presente_saz.csv'
 
@@ -177,7 +183,6 @@ def ibge_get_data(agreg, var, classif, period_ini, period_end):
 
         df0 = upd_data
     elif (agreg == 5932 and var == 6564 and classif == '11255[90696]'):
-        print('aqui')
         url = 'https://www.primetalkdata.com/datacenter/fgv_data/icv_presente_saz.csv'
 
         upd_data = pd.DataFrame([info.split(',') for info in requests.get(url).text.split('\r\n')][1:], columns=['data', 'valor']).dropna()
