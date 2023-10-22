@@ -86,7 +86,7 @@ def load_symbol_data(symbol):
         if gvar['ERROR'] != '':
             return
 
-        print(datahead)
+    
         if datahead[:3] == 'BC_':
             if (datahead[3:].isdigit()):
                 bc_sgs_agreg = int(datahead[3:])
@@ -121,6 +121,7 @@ def load_symbol_data(symbol):
             return
         else:
             df[symbol] = load_data_digitado(symbol, datahead, skiprows)
+            print(df[symbol])
             gvar['legend'].append(df[symbol].columns[1])
             df[symbol].rename(columns={'x':'setor', df[symbol].columns[1]:'valor'}, inplace=True)
             df[symbol]['setor'] = df[symbol]['setor'].astype(str).str.strip()

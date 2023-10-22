@@ -1,0 +1,43 @@
+title;PREÇO MÉDIO DO COMBUSTÍVEL
+subtit;Ponderado pelos 5 mais caros e 5 mais baratos
+dfont;ANP
+vtype;rvalue
+decimal;2
+group;name
+type;tableV
+;
+;
+;
+tab_x;        c200
+tab_y;        m380
+;tab_tit_fs;  34
+tab_fs;       33
+tab_tit_fc;   bold_white
+tab_fc;       bold_4
+tab_tit_dy;   50
+tab_dy;       46
+tab_dx;       190
+tab_tit_rect; 320,44,#283C50D9,
+tab_rect;     320,40,#283C504D,
+;
+tab_tit_fs_in;24
+tab_fs_in;    26
+tab_dx_in;    220
+tab_tit_rect_in; 270,44,#283C50D9,
+tab_rect_in;     270,40,#283C504D,
+;
+;rgba(40,60,80,217),
+;
+;
+;
+data;begin
+x;y;v2;v3;v4
+Estado;	RJ;	RJ;	SP;	SP
+Tipo;	Mais Caro;	Mais Barato;	Mais Caro;	Mais Barato
+Diesel;	6.41;	6.49;	5.75;	5.67
+Diesel S10;	6.69;	6.61;	5.87;	5.88
+Etanol;	4.79;	3.99;	3.86;	3.06
+Gasol. Adit.;	6.4;	6.43;	5.56;	5.44
+Gasolina;	6.05;	6.33;	5.28;	5.48
+GLP;	116.93;	114.55;	85.01;	85.56
+GNV;	6.04;	4.83;	4.26;	3.9

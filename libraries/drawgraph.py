@@ -679,7 +679,7 @@ def update_graph(fig, symbol, n_months, title, subtit, dfont, bg_transparent, va
                 else:
                     add_annot(annot, title_x-13, TITLE_Y, text_contour(title, isTitle=True, color='#50B7F8'), None, 189, xanchor=xanchor, align=align)
                 add_annot(annot, title_x, TITLE_Y,
-                    title.split(' ', 1)[0].upper(), title_fc, title_fs,
+                    title.upper(), title_fc, title_fs,
                     xanchor=xanchor, align=align)
             else:
                 add_annot(annot, title_x, TITLE_Y,
