@@ -59,7 +59,7 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
     pd.DataFrame(mdict).to_csv(f'data/out/{symbol}.csv', sep=';', index=False)
 
     graph_type = data['type']
-
+    
     txt_bg_color, graph_layer = True, None
     if TEMPLATE in ['INVEST_NEWS_BLACK', 'JP_MERC_FIN_3', 'JP_MERC_FIN_4', 'SBT']:
         txt_bg_color = False
@@ -104,7 +104,6 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
     obs = ''
     if '*' in data['subtit']:
         obs = ' *'
-
 
     # Ajusta valores não-default (se houver no 'digitado')
     block_x = BLOCK_X
@@ -225,14 +224,13 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
         if TEMPLATE not in ['SBT']:
             x0 += get_block_dx(data, pos)
         else:
-            if symbol != 'SELIC':
-                x0 += (xmax)/(size+1.5)
-            else:
-                x0 += (xmax)/(size+11)
+            x0 += (xmax-block_x)/(size)
 
     gvar['bar_xc'] = []
 
     val_old = 0
+    if symbol in ['SELIC', 'BC_US', 'BC_EUR']:
+        val_old = data['yaxis'][0]
     # draw bars
     for pos in range(size):
         val  = data['yaxis'][pos]
@@ -349,7 +347,7 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
             if TEMPLATE != 'SBT_LOWER':
                 if graph_type == 'step':
                     last_diff=True
-                    val_y -= 50
+                    val_y -= 5
                     txt += '%'
                 txt = text_bold(txt, last_diff or bar_val_bold)
                 add_annot(annot, xc, val_y, txt, bar_val_fc, bar_val_fs,
@@ -398,7 +396,6 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
                 add_annot(annot, xc, date_y, legend, color, font_size,
                     xanchor='center', yanchor=date_yanchor, bg_color=txt_bg_color)
 
-
         # Date at beginnig of the bar
         txt = str(data['xaxis'][pos])
         if txt == 'nan':
@@ -432,8 +429,10 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
         if TEMPLATE in ['SBT']:
             if val>val_old:
                 color = '#50B7F8'
-            else:
+            elif val<val_old:
                 color = '#FF8793'
+            elif val == val_old:
+                color = '#FFF'
             if TEMPLATE != 'SBT_LOWER':
                 txt = text_bold(txt, True)
 
@@ -448,13 +447,18 @@ def index_draw_graph(fig, annot, symbol, n_months, val_col=None):
         
         if TEMPLATE == 'SBT':
             if val>0:
-                arrow_y = val_y+30
-
-            else:
-                arrow_y = val_y-30
+                if symbol != ['SELIC', 'BC_US', 'BC_EUR']:
+                    arrow_y = val_y+30
+                else:
+                    arrow_y = val_y
+            elif val < 0:
+                if symbol != ['SELIC', 'BC_US', 'BC_EUR']:
+                    arrow_y = val_y-30
+                else:
+                    arrow_y = val_y
             if val>val_old:
                 add_image(fig, 'images/sbt_up_arrow.png', x0, arrow_y, 40, 35, layer='above')
-            else:
+            elif val<val_old:
                 add_image(fig, 'images/sbt_down_arrow.png', x0, arrow_y, 40, 35, layer='above')
         
         val_old = val

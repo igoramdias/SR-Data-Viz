@@ -129,10 +129,6 @@ def load_symbol_data(symbol):
                 url = 'https://www.primetalkdata.com/datacenter/fgv_data/ics_presente_saz.csv'
                 df[symbol] = pd.DataFrame([info.split(',') for info in requests.get(url).text.split('\r\n')][1:], columns=['setor', 'valor']).dropna()
                 df[symbol].valor = df[symbol].valor.astype(float)
-            #elif (symbol == 'SELIC'):
-            #    url = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?formato=json'
-            #    df[symbol] = pd.DataFrame([info.split(',') for info in requests.get(url).text.split('\r\n')][1:], columns=['setor', 'valor']).dropna()
-            #    df[symbol].valor = df[symbol].valor.astype(float)
 
 
             # Se group não for "name" assume como data
